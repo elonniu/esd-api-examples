@@ -9,10 +9,9 @@ import requests
 import streamlit as st
 from dotenv import load_dotenv
 
-from infer_extra_single_image import sidebar_links
+from infer_extra_single_image import sidebar_links, get_inference_job, generate_lcm_image
+from infer_lcm import run_inference_job
 
-logging.basicConfig(level=logging.INFO)
-# logging to stdout
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -84,20 +83,6 @@ def generate_image(positive_prompts: str, progress_bar):
     return inference["id"]
 
 
-def get_inference_job(inference_id: str):
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        'x-api-key': API_KEY
-    }
-
-    url = API_URL + "inferences" + "/" + inference_id
-    job = requests.get(url, headers=headers)
-    st.info(f"get status of inference job {url}")
-
-    return job.json()
-
-
 def create_inference_job():
     headers = {
         "Content-Type": "application/json",
@@ -135,19 +120,6 @@ def create_inference_job():
     return job.json()
 
 
-def run_inference_job(inference_id: str):
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        'x-api-key': API_KEY
-    }
-
-    url = API_URL + "inferences" + '/' + inference_id + '/start'
-    job = requests.put(url, headers=headers)
-    st.info(f"run inference job {url}")
-    return job.json()
-
-
 def upload_inference_job_api_params(s3_url, img_url: str):
     with open('rembg-api-params.json') as f:
         api_params = json.load(f)
@@ -169,21 +141,6 @@ def upload_inference_job_api_params(s3_url, img_url: str):
     response = requests.put(s3_url, data=json_string)
     response.raise_for_status()
     return response
-
-
-def generate_lcm_image(initial_prompt: str):
-    st.spinner()
-    st.session_state.progress = 5
-    # Keep one progress bar instance for each column
-    progress_bar = st.progress(st.session_state.progress)
-
-    st.session_state.progress += 15
-    progress_bar.progress(st.session_state.progress)
-
-    generate_image(initial_prompt, progress_bar)
-    st.session_state.succeed_count += 1
-    progress_bar.empty()
-    progress_bar.hidden = True
 
 
 if __name__ == "__main__":

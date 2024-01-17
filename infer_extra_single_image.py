@@ -9,8 +9,8 @@ import requests
 import streamlit as st
 from dotenv import load_dotenv
 
-logging.basicConfig(level=logging.INFO)
-# logging to stdout
+from infer_lcm import run_inference_job
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -133,18 +133,6 @@ def create_inference_job():
     return job.json()
 
 
-def run_inference_job(inference_id: str):
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        'x-api-key': API_KEY
-    }
-
-    job = requests.put(API_URL + 'inferences/' + inference_id + '/start', headers=headers)
-
-    return job.json()
-
-
 def upload_inference_job_api_params(s3_url, img_url: str):
     with open('extra-single-image-api-params.json') as f:
         api_params = json.load(f)
@@ -185,17 +173,18 @@ def generate_lcm_image(initial_prompt: str):
 
 def sidebar_links(action: str):
     st.set_page_config(page_title=f"{action} - ESD", layout="wide")
-    st.title(f"{action} - ESD")
+    st.title(f"{action}")
 
     st.sidebar.image("https://d0.awsstatic.com/logos/powered-by-aws.png", width=200)
+    st.sidebar.subheader("ESD")
     st.sidebar.markdown(
-"""
-- [extra-single-image](https://esd-extra-single-image.streamlit.app/)
-- [img2img](https://esd-img2img.streamlit.app/)
-- [lcm](https://esd-lcm.streamlit.app/)
-- [rembg](https://esd-rembg.streamlit.app/)
-- [txt2img](https://esd-txt2img.streamlit.app/)
-"""
+        """
+        - [extra-single-image](https://esd-extra-single-image.streamlit.app/)
+        - [img2img](https://esd-img2img.streamlit.app/)
+        - [lcm](https://esd-lcm.streamlit.app/)
+        - [rembg](https://esd-rembg.streamlit.app/)
+        - [txt2img](https://esd-txt2img.streamlit.app/)
+        """
     )
 
 

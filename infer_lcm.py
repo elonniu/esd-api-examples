@@ -8,10 +8,8 @@ import requests
 import streamlit as st
 from dotenv import load_dotenv
 
-from infer_extra_single_image import sidebar_links
+from infer_extra_single_image import sidebar_links, get_inference_job, generate_lcm_image
 
-logging.basicConfig(level=logging.INFO)
-# logging to stdout
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -79,18 +77,6 @@ def generate_image(positive_prompts: str, progress_bar):
         st.warning(warning)
 
     return inference["id"]
-
-
-def get_inference_job(inference_id: str):
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        'x-api-key': API_KEY
-    }
-
-    job = requests.get(API_URL + "inferences" + '/' + inference_id, headers=headers)
-
-    return job.json()
 
 
 def create_inference_job():
@@ -276,21 +262,6 @@ def upload_inference_job_api_params(s3_url, positive: str):
     response = requests.put(s3_url, data=json_string)
     response.raise_for_status()
     return response
-
-
-def generate_lcm_image(initial_prompt: str):
-    st.spinner()
-    st.session_state.progress = 5
-    # Keep one progress bar instance for each column
-    progress_bar = st.progress(st.session_state.progress)
-
-    st.session_state.progress += 15
-    progress_bar.progress(st.session_state.progress)
-
-    generate_image(initial_prompt, progress_bar)
-    st.session_state.succeed_count += 1
-    progress_bar.empty()
-    progress_bar.hidden = True
 
 
 if __name__ == "__main__":
