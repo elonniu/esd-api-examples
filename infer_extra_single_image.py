@@ -186,7 +186,17 @@ def generate_lcm_image(initial_prompt: str):
 def sidebar_links(action: str):
     st.set_page_config(page_title=f"{action} - ESD", layout="wide")
     st.title(f"{action} - ESD")
+
     st.sidebar.image("https://d0.awsstatic.com/logos/powered-by-aws.png", width=200)
+    st.sidebar.markdown(
+"""
+- [extra-single-image](https://esd-extra-single-image.streamlit.app/)
+- [img2img](https://esd-img2img.streamlit.app/)
+- [lcm](https://esd-lcm.streamlit.app/)
+- [rembg](https://esd-rembg.streamlit.app/)
+- [txt2img](https://esd-txt2img.streamlit.app/)
+"""
+    )
 
 
 if __name__ == "__main__":
