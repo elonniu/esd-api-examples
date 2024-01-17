@@ -9,7 +9,7 @@ import requests
 import streamlit as st
 from dotenv import load_dotenv
 
-from lib import sidebar_links, get_inference_job, run_inference_job
+from lib import sidebar_links, Api
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -26,7 +26,6 @@ API_KEY = os.getenv("API_KEY")
 # Some resources are limited to specific users
 API_USERNAME = os.getenv("API_USERNAME", 'admin')
 
-default_model = "v1-5-pruned-emaonly.safetensors"
 
 def generate_lcm_image(initial_prompt: str):
     st.spinner()
@@ -41,6 +40,7 @@ def generate_lcm_image(initial_prompt: str):
     st.session_state.succeed_count += 1
     progress_bar.empty()
     progress_bar.hidden = True
+
 
 def generate_image(positive_prompts: str, progress_bar):
     job = create_inference_job()
@@ -58,7 +58,7 @@ def generate_image(positive_prompts: str, progress_bar):
     st.session_state.progress += 5
     progress_bar.progress(st.session_state.progress)
 
-    run_resp = run_inference_job(inference["id"])
+    run_resp = api.run_inference_job(inference["id"])
     st.info("run inference job")
     st.json(run_resp)
 
@@ -70,7 +70,7 @@ def generate_image(positive_prompts: str, progress_bar):
     progress_bar.progress(st.session_state.progress)
 
     while True:
-        status_response = get_inference_job(inference["id"])
+        status_response = api.get_inference_job(inference["id"])
         st.json(status_response)
         # if status is not created, increase the progress bar
         if status_response['data']['status'] != 'created':
@@ -96,21 +96,13 @@ def generate_image(positive_prompts: str, progress_bar):
 
 
 def create_inference_job():
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        'x-api-key': API_KEY
-    }
-
     body = {
-        'user_id': 'admin',
+        'user_id': api.api_username,
         'task_type': 'extra-single-image',
         'inference_type': 'Async',
         'models':
             {
                 'Stable-diffusion': ['v1-5-pruned-emaonly.safetensors'],
-                # 'VAE': ['Automatic'],
-                # 'embeddings': []
             },
         'filters':
             {
@@ -119,17 +111,7 @@ def create_inference_job():
             }
     }
 
-    st.info("payload for create inference job")
-    st.json(body)
-
-    job = requests.post(API_URL + "inferences", headers=headers, json=body)
-    st.info(f"create inference job response\nPOST {API_URL}inferences")
-    st.json(job.json())
-
-    if job.status_code == 403:
-        raise Exception(f"Your API URL or API KEY is not correct. Please check your .env file.")
-
-    return job.json()
+    return api.create_inference_job(body)
 
 
 def upload_inference_job_api_params(s3_url, img_url: str):
@@ -171,12 +153,7 @@ if __name__ == "__main__":
         button = st.button('Generate new Image')
 
         if button:
-            API_URL = api_url
-            API_KEY = api_key
-            API_USERNAME = api_username
-
-            if not API_URL or not API_KEY or not API_USERNAME:
-                raise Exception("API URL, API KEY and API Username can not be empty")
+            api = Api(api_url, api_key, api_username)
 
             st.session_state.warnings = []
             st.session_state.succeed_count = 0
