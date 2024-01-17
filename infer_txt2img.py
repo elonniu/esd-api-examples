@@ -27,9 +27,6 @@ API_KEY = os.getenv("API_KEY")
 # Some resources are limited to specific users
 API_USERNAME = os.getenv("API_USERNAME")
 
-# API URL
-GENERATE_API_URL = API_URL + "inferences"
-
 default_model = "v1-5-pruned-emaonly.safetensors"
 
 
@@ -90,7 +87,7 @@ def get_inference_job(inference_id: str):
         'x-api-key': API_KEY
     }
 
-    url = GENERATE_API_URL + '/' + inference_id
+    url = API_URL + "inferences" + '/' + inference_id
     job = requests.get(url, headers=headers)
     st.info(f"get status of inference job {url}")
 
@@ -121,12 +118,12 @@ def create_inference_job():
     st.info("payload for create inference job")
     st.json(body)
 
-    job = requests.post(GENERATE_API_URL, headers=headers, json=body)
+    job = requests.post(API_URL + "inferences", headers=headers, json=body)
 
     if job.status_code == 403:
         raise Exception(f"Your API URL or API KEY is not correct. Please check your .env file.")
 
-    st.info(f"create inference job response\nPOST {GENERATE_API_URL}")
+    st.info(f"create inference job response\nPOST {API_URL}inferences")
     st.json(job.json())
     return job.json()
 
@@ -138,7 +135,7 @@ def run_inference_job(inference_id: str):
         'x-api-key': API_KEY
     }
 
-    job = requests.put(GENERATE_API_URL + '/' + inference_id + '/start', headers=headers)
+    job = requests.put(API_URL + "inferences" + '/' + inference_id + '/start', headers=headers)
 
     return job.json()
 
