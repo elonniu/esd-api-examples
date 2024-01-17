@@ -26,7 +26,7 @@ API_URL = os.getenv("API_URL")
 API_KEY = os.getenv("API_KEY")
 # Your username in Extension for Stable Diffusion
 # Some resources are limited to specific users
-API_USERNAME = os.getenv("API_USERNAME")
+API_USERNAME = os.getenv("API_USERNAME", 'admin')
 
 default_model = "v1-5-pruned-emaonly.safetensors"
 
@@ -194,9 +194,9 @@ if __name__ == "__main__":
         img_url = 'https://img2.baidu.com/it/u=854943903,3669169186&fm=253&fmt=auto&app=138&f=JPEG?w=750&h=500'
         original_image = st.image(img_url)
 
-        api_url = st.text_input("Please input API URL:", API_URL)
-        api_key = st.text_input("Please input API KEY:", API_KEY)
-        api_username = st.text_input("Please input API Username:", API_USERNAME)
+        api_url = st.text_input("API URL:", API_URL)
+        api_key = st.text_input("API KEY:", API_KEY)
+        api_username = st.text_input("API Username:", API_USERNAME)
 
         prompt = st.text_input("Please input image URL:", img_url)
         button = st.button('Generate new Image')
@@ -205,6 +205,10 @@ if __name__ == "__main__":
             API_URL = api_url
             API_KEY = api_key
             API_USERNAME = api_username
+
+            if not API_URL or not API_KEY or not API_USERNAME:
+                raise Exception("API URL, API KEY and API Username can not be empty")
+
             original_image.image(prompt)
             st.session_state.warnings = []
             st.session_state.succeed_count = 0

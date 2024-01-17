@@ -25,7 +25,7 @@ API_URL = os.getenv("API_URL")
 API_KEY = os.getenv("API_KEY")
 # Your username in Extension for Stable Diffusion
 # Some resources are limited to specific users
-API_USERNAME = os.getenv("API_USERNAME")
+API_USERNAME = os.getenv("API_USERNAME", 'admin')
 
 default_model = "v1-5-pruned-emaonly.safetensors"
 
@@ -182,9 +182,9 @@ if __name__ == "__main__":
         # User input
         original_image = st.image("./cat.png")
 
-        api_url = st.text_input("Please input API URL:", API_URL)
-        api_key = st.text_input("Please input API KEY:", API_KEY)
-        api_username = st.text_input("Please input API Username:", API_USERNAME)
+        api_url = st.text_input("API URL:", API_URL)
+        api_key = st.text_input("API KEY:", API_KEY)
+        api_username = st.text_input("API Username:", API_USERNAME)
 
         prompt = st.text_input("What image do you want to update?", "dog face")
         button = st.button('Generate new Image')
@@ -193,6 +193,10 @@ if __name__ == "__main__":
             API_URL = api_url
             API_KEY = api_key
             API_USERNAME = api_username
+
+            if not API_URL or not API_KEY or not API_USERNAME:
+                raise Exception("API URL, API KEY and API Username can not be empty")
+
             st.session_state.warnings = []
             st.session_state.succeed_count = 0
             generate_lcm_image(prompt)
