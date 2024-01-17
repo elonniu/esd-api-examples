@@ -261,7 +261,7 @@ if __name__ == "__main__":
 
         # User input
         prompt = st.text_input("What image do you want to create today?", "A cute dog <lora:lcm_lora_1_5:1>")
-        inference_type = st.radio("Inference Type", ('Async', 'Real-time'))
+        inference_type = st.radio("Inference Type", ('Async', 'Real-time'), horizontal=True)
         button = st.button('Generate Image')
 
         if button:

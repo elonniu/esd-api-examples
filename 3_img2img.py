@@ -146,7 +146,7 @@ if __name__ == "__main__":
 
         prompt = st.text_input("What image do you want to update?", "dog face")
 
-        inference_type = st.radio("Inference Type", ('Async', 'Real-time'))
+        inference_type = st.radio("Inference Type", ('Async', 'Real-time'), horizontal=True)
 
         button = st.button('Generate new Image')
 

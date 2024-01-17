@@ -150,7 +150,7 @@ if __name__ == "__main__":
 
         prompt = st.text_input("Please input image URL:", img_url)
 
-        inference_type = st.radio("Inference Type", ('Async', 'Real-time'))
+        inference_type = st.radio("Inference Type", ('Async', 'Real-time'), horizontal=True)
 
         button = st.button('Generate new Image')
 

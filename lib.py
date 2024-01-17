@@ -80,7 +80,7 @@ def sidebar_links(action: str):
         - [txt2img](https://esd-txt2img.streamlit.app/)
         - [txt2img lcm](https://esd-lcm.streamlit.app/)
         - [img2img](https://esd-img2img.streamlit.app/)
-        - [rembg](https://esd-rembg.streamlit.app/)
         - [extra-single-image](https://esd-extra-single-image.streamlit.app/)
+        - [rembg](https://esd-rembg.streamlit.app/)
         """
     )
