@@ -57,16 +57,18 @@ def generate_image(positive_prompts: str, progress_bar):
     st.session_state.progress += 5
     progress_bar.progress(st.session_state.progress)
 
-    run_resp = api.run_inference_job(inference["id"])
-    st.info("run inference job")
-    st.json(run_resp)
+    run_resp = api.start_inference_job(inference["id"])
+
+    if api.inference_type == 'Real-time':
+        st.info("render data.img_presigned_urls")
+        st.image(run_resp['data']['img_presigned_urls'][0], use_column_width=True)
+        return
 
     st.session_state.progress += 5
     progress_bar.progress(st.session_state.progress)
 
     while True:
         status_response = api.get_inference_job(inference["id"])
-        st.json(status_response)
         status_response = status_response['data']
         # if status is not created, increase the progress bar
         if status_response['status'] != 'created':
@@ -76,28 +78,27 @@ def generate_image(positive_prompts: str, progress_bar):
         logger.info("job status: {}".format(status_response['status']))
         if status_response['status'] == 'succeed':
             progress_bar.progress(100)
-            st.info('data.img_presigned_urls')
-            st.image(status_response['img_presigned_urls'][0], use_column_width=True)
+            st.info("render data.img_presigned_urls")
+            st.image(status_response['img_presigned_urls'], use_column_width=True)
             break
         elif status_response['status'] == 'failed':
-            st.error(f"Image generation failed.{status_response['sagemakerRaw']}")
-            return
+            st.error(f"Image generation failed:")
+            break
         else:
-            time.sleep(2)
+            time.sleep(1)
 
     for warning in st.session_state.warnings:
         st.warning(warning)
-
-    return inference["id"]
 
 
 def create_inference_job():
     body = {
         'user_id': api.api_username,
         "task_type": "txt2img",
-        "inference_type": "Async",
+        'inference_type': api.inference_type,
         "models": {
             "Stable-diffusion": ["v1-5-pruned-emaonly.safetensors"],
+            "Lora": ["lcm_lora_1_5.safetensors"],
             "embeddings": []
         },
         "filters": {
@@ -119,11 +120,11 @@ def upload_inference_job_api_params(s3_url, positive: str):
         "subseed_strength": 0.0,
         "seed_resize_from_h": -1,
         "seed_resize_from_w": -1,
-        "sampler_name": "DPM++ 2M Karras",
+        "sampler_name": "LCM",
         "batch_size": 1,
         "n_iter": 1,
-        "steps": 20,
-        "cfg_scale": 7.0,
+        "steps": 4,
+        "cfg_scale": 1.0,
         "width": 512,
         "height": 512,
         "restore_faces": None,
@@ -241,6 +242,10 @@ def upload_inference_job_api_params(s3_url, positive: str):
     }
 
     json_string = json.dumps(api_params)
+
+    st.info("payload for api_params upload")
+    st.json(json_string, expanded=False)
+
     response = requests.put(s3_url, data=json_string)
     response.raise_for_status()
     return response
@@ -248,18 +253,19 @@ def upload_inference_job_api_params(s3_url, positive: str):
 
 if __name__ == "__main__":
     try:
-        sidebar_links("txt2img")
+        sidebar_links("txt2-img lcm")
 
         api_url = st.text_input("API URL:", API_URL)
         api_key = st.text_input("API KEY:", API_KEY)
         api_username = st.text_input("API Username:", API_USERNAME)
 
         # User input
-        prompt = st.text_input("Please input prompt:", "A cute dog")
+        prompt = st.text_input("What image do you want to create today?", "A cute dog <lora:lcm_lora_1_5:1>")
+        inference_type = st.radio("Inference Type", ('Async', 'Real-time'))
         button = st.button('Generate Image')
 
         if button:
-            api = Api(api_url, api_key, api_username)
+            api = Api(api_url, api_key, api_username, inference_type)
             st.session_state.warnings = []
             st.session_state.succeed_count = 0
             generate_lcm_image(prompt)

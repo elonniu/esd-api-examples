@@ -58,9 +58,12 @@ def generate_image(positive_prompts: str, progress_bar):
     st.session_state.progress += 5
     progress_bar.progress(st.session_state.progress)
 
-    run_resp = api.run_inference_job(inference["id"])
-    st.info("run inference job")
-    st.json(run_resp)
+    run_resp = api.start_inference_job(inference["id"])
+
+    if api.inference_type == 'Real-time':
+        st.info("render data.img_presigned_urls")
+        st.image(run_resp['data']['img_presigned_urls'][0], use_column_width=True)
+        return
 
     if 'errorMessage' in run_resp:
         st.error(run_resp['errorMessage'])
@@ -71,7 +74,6 @@ def generate_image(positive_prompts: str, progress_bar):
 
     while True:
         status_response = api.get_inference_job(inference["id"])
-        st.json(status_response)
         # if status is not created, increase the progress bar
         if status_response['data']['status'] != 'created':
             if st.session_state.progress < 80:
@@ -92,14 +94,12 @@ def generate_image(positive_prompts: str, progress_bar):
     for warning in st.session_state.warnings:
         st.warning(warning)
 
-    return inference["id"]
-
 
 def create_inference_job():
     body = {
         'user_id': api.api_username,
         'task_type': 'extra-single-image',
-        'inference_type': 'Async',
+        'inference_type': api.inference_type,
         'models':
             {
                 'Stable-diffusion': ['v1-5-pruned-emaonly.safetensors'],
@@ -130,7 +130,7 @@ def upload_inference_job_api_params(s3_url, img_url: str):
     json_string = json.dumps(api_params)
 
     st.info("api_params payload upload")
-    st.json(api_params)
+    st.json(api_params, expanded=False)
 
     response = requests.put(s3_url, data=json_string)
     response.raise_for_status()
@@ -150,10 +150,12 @@ if __name__ == "__main__":
 
         prompt = st.text_input("Please input image URL:", img_url)
 
+        inference_type = st.radio("Inference Type", ('Async', 'Real-time'))
+
         button = st.button('Generate new Image')
 
         if button:
-            api = Api(api_url, api_key, api_username)
+            api = Api(api_url, api_key, api_username, inference_type)
 
             st.session_state.warnings = []
             st.session_state.succeed_count = 0
