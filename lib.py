@@ -30,7 +30,7 @@ class Api:
 
         url = self.api_url + "inferences/" + inference_id
         job = requests.get(url, headers=headers)
-        st.info(f"get status of inference job {url}")
+        st.info(f"get status of inference job GET {url}")
         st.json(job.json(), expanded=False)
 
         return job.json()
@@ -44,7 +44,7 @@ class Api:
 
         url = self.api_url + 'inferences/' + inference_id + '/start'
         job = requests.put(url, headers=headers)
-        st.info(f"start inference job response {url}")
+        st.info(f"start inference job response PUT {url}")
         st.json(job.json(), expanded=False)
 
         return job.json()
