@@ -75,10 +75,11 @@ def sidebar_links(action: str):
     st.sidebar.subheader("Extension for Stable Diffusion on AWS")
     st.sidebar.markdown(
         """
-        - [extra-single-image](https://esd-extra-single-image.streamlit.app/)
-        - [img2img](https://esd-img2img.streamlit.app/)
-        - [lcm](https://esd-lcm.streamlit.app/)
-        - [rembg](https://esd-rembg.streamlit.app/)
-        - [txt2img](https://esd-txt2img.streamlit.app/)
+        - Async Inference
+          - [txt2img](https://esd-txt2img.streamlit.app/)
+          - [txt2img lcm](https://esd-lcm.streamlit.app/)
+          - [img2img](https://esd-img2img.streamlit.app/)
+          - [rembg](https://esd-rembg.streamlit.app/)
+          - [extra-single-image](https://esd-extra-single-image.streamlit.app/)
         """
     )
