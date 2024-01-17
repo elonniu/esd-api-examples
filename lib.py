@@ -37,19 +37,6 @@ def get_inference_job(inference_id: str):
     return job.json()
 
 
-def generate_lcm_image(initial_prompt: str):
-    st.spinner()
-    st.session_state.progress = 5
-    # Keep one progress bar instance for each column
-    progress_bar = st.progress(st.session_state.progress)
-
-    st.session_state.progress += 15
-    progress_bar.progress(st.session_state.progress)
-
-    generate_image(initial_prompt, progress_bar)
-    st.session_state.succeed_count += 1
-    progress_bar.empty()
-    progress_bar.hidden = True
 
 
 def run_inference_job(inference_id: str):

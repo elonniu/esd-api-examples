@@ -8,7 +8,7 @@ import requests
 import streamlit as st
 from dotenv import load_dotenv
 
-from lib import sidebar_links, get_inference_job, generate_lcm_image, run_inference_job
+from lib import sidebar_links, get_inference_job,  run_inference_job
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -27,6 +27,20 @@ API_USERNAME = os.getenv("API_USERNAME", 'admin')
 
 default_model = "v1-5-pruned-emaonly.safetensors"
 
+
+def generate_lcm_image(initial_prompt: str):
+    st.spinner()
+    st.session_state.progress = 5
+    # Keep one progress bar instance for each column
+    progress_bar = st.progress(st.session_state.progress)
+
+    st.session_state.progress += 15
+    progress_bar.progress(st.session_state.progress)
+
+    generate_image(initial_prompt, progress_bar)
+    st.session_state.succeed_count += 1
+    progress_bar.empty()
+    progress_bar.hidden = True
 
 def generate_image(positive_prompts: str, progress_bar):
     job = create_inference_job()
