@@ -9,7 +9,7 @@ import requests
 import streamlit as st
 from dotenv import load_dotenv
 
-from infer_lcm import run_inference_job
+from lib import sidebar_links, get_inference_job, generate_lcm_image, run_inference_job
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -82,20 +82,6 @@ def generate_image(positive_prompts: str, progress_bar):
     return inference["id"]
 
 
-def get_inference_job(inference_id: str):
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        'x-api-key': API_KEY
-    }
-
-    url = API_URL + "inferences/" + inference_id
-    job = requests.get(url, headers=headers)
-    st.info(f"get status of inference job {url}")
-
-    return job.json()
-
-
 def create_inference_job():
     headers = {
         "Content-Type": "application/json",
@@ -154,38 +140,6 @@ def upload_inference_job_api_params(s3_url, img_url: str):
     response = requests.put(s3_url, data=json_string)
     response.raise_for_status()
     return response
-
-
-def generate_lcm_image(initial_prompt: str):
-    st.spinner()
-    st.session_state.progress = 5
-    # Keep one progress bar instance for each column
-    progress_bar = st.progress(st.session_state.progress)
-
-    st.session_state.progress += 15
-    progress_bar.progress(st.session_state.progress)
-
-    generate_image(initial_prompt, progress_bar)
-    st.session_state.succeed_count += 1
-    progress_bar.empty()
-    progress_bar.hidden = True
-
-
-def sidebar_links(action: str):
-    st.set_page_config(page_title=f"{action} - ESD", layout="wide")
-    st.title(f"{action}")
-
-    st.sidebar.image("https://d0.awsstatic.com/logos/powered-by-aws.png", width=200)
-    st.sidebar.subheader("ESD")
-    st.sidebar.markdown(
-        """
-        - [extra-single-image](https://esd-extra-single-image.streamlit.app/)
-        - [img2img](https://esd-img2img.streamlit.app/)
-        - [lcm](https://esd-lcm.streamlit.app/)
-        - [rembg](https://esd-rembg.streamlit.app/)
-        - [txt2img](https://esd-txt2img.streamlit.app/)
-        """
-    )
 
 
 if __name__ == "__main__":

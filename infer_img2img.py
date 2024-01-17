@@ -8,8 +8,7 @@ import requests
 import streamlit as st
 from dotenv import load_dotenv
 
-from infer_extra_single_image import sidebar_links, get_inference_job, generate_lcm_image
-from infer_lcm import run_inference_job
+from lib import sidebar_links, get_inference_job, generate_lcm_image, run_inference_job
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

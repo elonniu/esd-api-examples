@@ -8,7 +8,7 @@ import requests
 import streamlit as st
 from dotenv import load_dotenv
 
-from infer_extra_single_image import sidebar_links, get_inference_job, generate_lcm_image
+from lib import sidebar_links, get_inference_job, generate_lcm_image, run_inference_job
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -108,21 +108,6 @@ def create_inference_job():
 
     if job.status_code == 403:
         raise Exception(f"Your API URL or API KEY is not correct. Please check your .env file.")
-
-    return job.json()
-
-
-def run_inference_job(inference_id: str):
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        'x-api-key': API_KEY
-    }
-
-    url = API_URL + "inferences" + '/' + inference_id + '/start'
-    job = requests.put(url, headers=headers)
-    st.info(f"payload for run inference job {url}")
-    st.json(job.json())
 
     return job.json()
 
