@@ -185,4 +185,4 @@ if __name__ == "__main__":
             generate_lcm_image(prompt)
     except Exception as e:
         logger.exception(e)
-        raise e
+        st.error(e)
